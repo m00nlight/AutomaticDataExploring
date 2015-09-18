@@ -23,7 +23,7 @@ library(grid)
 # Load the data you want to explore first
 
 ```{r}
-data = read.csv("./input-data/train.csv")
+data = read.csv("./input-data/boston.csv")
 str(data)
 ```
 
@@ -75,7 +75,7 @@ data = data[, !delete_columns]
 
 for (c in colnames(data)) {
   if (length(unique(data[, c])) <= 30) {
-    print(ggplot(data, aes(x = c, fill = factor(data[, c]))) + geom_bar(width = 1) 
+    print(ggplot(data, aes(x = factor(1), fill = factor(data[, c]))) + geom_bar(width = 1) 
           + coord_polar(theta = "y") + ggtitle(paste("pie chart for", c)))
   }
 }
@@ -83,6 +83,32 @@ for (c in colnames(data)) {
 ```
 
 # Exploring numeric like data
-```{r, echo = FALSE}
 
+```{r, echo = FALSE}
+for (c in colnames(data)) {
+  tmp = unique(data[, c][!is.na(data[, c])])
+  # select the column that like to be a distribution
+  if(length(tmp) >= 30 && length(tmp) <= 100) {
+    h = qplot(data[, c], xlab = c, ylab = "count", main = paste("histogram of", c)) +
+        geom_histogram(colour="black", fill="grey") +
+        theme(axis.text.x = element_text(angle = -45, hjust = 1))
+    b = qplot(sample = data[, c], stat = "qq", main = paste("quantile quantile", c))
+    multiplot(h, b, cols = 2)
+  }
+}
+```
+
+# Exploring relation between data column
+```{r, echo = FALSE}
+# TODO
+```
+
+# Exploring correlation of data fields
+
+```{r, echo = FALSE}
+# change data to numeric for correlation drawing.
+data = data.frame(data.matrix(data))
+missing_value = min(data, na.rm = TRUE)
+data[is.na(data)] = missing_value - 10000
+corrplot(cor(data))
 ```
